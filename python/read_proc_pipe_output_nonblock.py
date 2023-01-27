@@ -14,6 +14,8 @@ def enqueue_output(out, queue):
 
 def main():
     cmd = "ping 127.0.0.1 -q"
+    # cmd = "ls -1"
+    # cmd = "cat read_proc_pipe_output_nonblock.py"
     proc = subprocess.Popen(
         shlex.split(cmd), stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
@@ -22,21 +24,30 @@ def main():
     t = Thread(target=enqueue_output, args=(proc.stdout, q))
     t.daemon = True # thread dies with the program
     t.start()
-    num = 0
+    start_time = time.monotonic()
+    timeout = 5
+    proc_normal_end = True
     while True:
         try:  line = q.get_nowait() # or q.get(timeout=.1)
         except Empty:
-            print('no output yet')
+            # print('no output yet')
+            pass
         else:
             print(line)
-        num += 1
-        print(num)
-        if num == 5:
+        if proc.poll() != None:
+            break
+        if timeout != None and time.monotonic() - start_time > timeout:
+            proc_normal_end = False
             break
         time.sleep(0.01)
-    proc.kill()
-    proc.wait()
+    if not proc_normal_end:
+        proc.kill()
+        proc.wait()
     t.join()
+    if proc_normal_end:
+        while not q.empty():
+            line = q.get()
+            print(line)
 
 if __name__ == '__main__':
     main()
