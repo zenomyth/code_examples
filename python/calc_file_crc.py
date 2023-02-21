@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-
+import sys
 import binascii
 
 def CRC32_from_file(filename):
@@ -15,5 +14,10 @@ def CRC32_from_file_nes(filename):
     buf = (binascii.crc32(buf) & 0xFFFFFFFF)
     return "%08X" % buf
 
-crc = CRC32_from_file_nes("C:\\Work\\Data\\x\\Teenage Mutant Ninja Turtles II - The Arcade Game (U) [!].nes")
-print(crc)
+if __name__ == "__main__":
+    file_path = "C:\\Work\\Data\\x\\Teenage Mutant Ninja Turtles II - The Arcade Game (U) [!].nes"
+    if len(sys.argv) > 1:
+        file_path = sys.argv[1]
+    crc = CRC32_from_file_nes(file_path)
+    print(crc)
+    sys.exit(0)
